@@ -7,3 +7,6 @@ data/ml-latest/ml-latest/ratings.csv
 data/ml-latest/ml-latest/README.txt
 data/ml-latest/ml-latest/tags.csv
 data/ml-latest.zip
+build/*
+src/movie_recommendations_system.egg-info/*
+src/movie_recommender_system.egg-info/*

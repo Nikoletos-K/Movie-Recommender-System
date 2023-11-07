@@ -1,0 +1,12 @@
+2023-11-07 13:21:12,867 INFO Data directory: dd
+2023-11-07 13:21:12,867 INFO Number of recommendations: 10
+2023-11-07 13:21:12,867 INFO Similarity metric: sim
+2023-11-07 13:21:12,868 INFO Algorithm: algo
+2023-11-07 13:21:12,868 INFO Input: 3746
+2023-11-07 13:21:12,869 INFO CSV files: ['genome-scores.csv', 'genome-tags.csv', 'links.csv', 'movies.csv', 'ratings.csv', 'tags.csv']
+2023-11-07 13:21:12,869 INFO Reading: genome-scores.csv
+2023-11-07 13:21:19,850 INFO Reading: genome-tags.csv
+2023-11-07 13:21:19,866 INFO Reading: links.csv
+2023-11-07 13:21:19,917 INFO Reading: movies.csv
+2023-11-07 13:21:20,071 INFO Reading: ratings.csv
+2023-11-07 13:21:34,979 INFO Reading: tags.csv
