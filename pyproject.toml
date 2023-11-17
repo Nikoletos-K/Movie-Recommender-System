@@ -3,6 +3,6 @@ requires      = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "movie-recommender-system"
+name = "movie_recommender_system"
 version = "0.1.0"
 dependencies = [ "numpy", "pandas", "scikit-learn" ]
