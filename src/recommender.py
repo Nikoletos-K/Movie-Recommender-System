@@ -4,9 +4,13 @@ import pandas as pd
 
 import argparse
 
-from movie_recommender_system.metrics import jaccard_similarity, cosine_similarity, pearson_similarity
-from movie_recommender_system.algorithms import UserUserALGO, ItemItemALGO, TagBasedALGO, ContentBasedALGO, HybridALGO
-
+from movie_recommender_system.algorithms import (
+    UserUserALGO,
+    ItemItemALGO,
+    TagBasedALGO,
+    ContentBasedALGO,
+    HybridALGO
+)
 
 # READ CLI INPUTS
 parser = argparse.ArgumentParser(description='Movie Recommender System')
@@ -31,7 +35,6 @@ print("Algorithm: ", algorithm)
 print("Input: ", input_i)
 
 # DATA READING
-# data_folder = '../../data/ml-latest/ml-latest'
 data_folder = data_dir
 csv_files = [f for f in os.listdir(data_folder) if f.endswith('.csv')]
 print("\nReading CSV files from: ", data_folder)
@@ -39,27 +42,26 @@ print("CSV files found: ", csv_files)
 dfs = {}
 for file in csv_files:
     print("\nReading: ", file)
-    df = pd.read_csv(os.path.join(data_folder, file), nrows=3383216)
+    df = pd.read_csv(os.path.join(data_folder, file), nrows=100000)
     file_name = file.split('.')[0]
     print("Saving as: ", file_name)
     print("Size: ", df.shape)
     print("Columns: ", df.columns)
     dfs[file_name] = df
-# print(dfs)
 
 if algorithm == "user":
-    # find ratings for user with id input_i
-    # user_ratings = dfs[2][dfs[2]['userId'] == input_i]
-    user_ratings = dfs['ratings']
     algo = UserUserALGO()
-    algo.fit(user_ratings, input_i, similarity_metric, num_recommendations)
-    # print(user_ratings)
+    algo.fit(dfs['ratings'], input_i, similarity_metric, num_recommendations)
 elif algorithm == "item":
-    pass
+    algo = ItemItemALGO()
+    algo.fit(dfs['ratings'], input_i, similarity_metric, num_recommendations)
 elif algorithm == "tag":
-    pass
+    print(dfs['tags'])
+    algo = TagBasedALGO()
+    algo.fit(dfs['tags'], input_i, similarity_metric, num_recommendations)
 elif algorithm == "title":
-    pass
+    content_based_algo = ContentBasedALGO()
+    content_based_algo.fit(dfs['movies'], input_i, similarity_metric, num_recommendations)
 elif algorithm == "hybrid":
     pass
 else:
