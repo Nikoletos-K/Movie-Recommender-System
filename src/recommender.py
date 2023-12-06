@@ -50,10 +50,7 @@ if 'ml-latest' in data_dir:
     print("\nReading CSV files from: ", data_folder)
     print("CSV files found: ", csv_files)
     dfs = {}
-    csv_files = ['genome-scores.csv', 'genome-tags.csv', 'links.csv', 'movies.csv', 'ratings.csv', 'tags.csv']
     for file in csv_files:
-        if file == 'genome-scores.csv' or file == 'genome-tags.csv' or file == 'links.csv':
-            continue
         print("\nReading: ", file)
         if nrows:
             df = pd.read_csv(os.path.join(data_folder, file), nrows=nrows)
@@ -61,7 +58,8 @@ if 'ml-latest' in data_dir:
             df = pd.read_csv(os.path.join(data_folder, file))
         file_name = file.split('.')[0]
         print("Saving as: ", file_name)
-        print("Size: ", df.shape)
+        print("Number of rows: ", df.shape[0])
+        print("Number of columns: ", df.shape[1])
         print("Columns: ", df.columns)
         dfs[file_name] = df
 elif 'ml-100k' in data_dir:
@@ -69,11 +67,13 @@ elif 'ml-100k' in data_dir:
     data_folder = data_dir
     print("\nReading: u.data")
     dfs['ratings'] = pd.read_csv(os.path.join(data_folder, 'u.data'), sep='\t', header=None, names=['userId','movieId','rating','timestamp'])
-    print(dfs['ratings'].head())
+    # print(dfs['ratings'].head())
+    print("Number of rows: ", dfs['ratings'].shape[0], "\nNumber of columns: ", dfs['ratings'].shape[1], "\nColumns: ", dfs['ratings'].columns)
 
     print("Reading: u.item")
     dfs['movies'] = pd.read_csv(os.path.join(data_folder, 'u.item'), sep='|', header=None, names=['movieId','title'], usecols=[0,1], encoding='latin-1')
-    print(dfs['movies'].head())
+    # print(dfs['movies'].head())
+    print("Number of rows: ", dfs['movies'].shape[0], "\nNumber of columns: ", dfs['movies'].shape[1], "\nColumns: ", dfs['movies'].columns)
 
 # Calculate execution time
 start_time = time.time()
@@ -151,7 +151,7 @@ elif algorithm == "hybrid":
 
     hybrid_algo = HybridALGO()
     weights = [0.5, 0.5]
-    movie_ids = hybrid_algo.fit(user_movie_ids, item_movie_ids, weights, num_recommendations)
+    movie_ids = hybrid_algo.fit(user_movie_ids, item_movie_ids, weights, dfs['movies'], similarity_metric, num_recommendations)
 
 else:
     print("Algorithm not recognized: ", algorithm)

@@ -2,7 +2,7 @@ from scipy.sparse import coo_matrix
 import numpy as np
 import pandas as pd
 from .metrics import cosine_similarity, dice_similarity, jaccard_similarity, pearson_similarity
-from sklearn.feature_extraction.text import TfidfVectorizer
+from .utils import CustomTfidfVectorizer
 from tqdm import tqdm
 from scipy.sparse import csr_matrix, coo_matrix
 
@@ -60,7 +60,7 @@ class UserUserALGO(RecommenderALGO):
         recommendations = []
         
         preprocess_calculations = {}
-        for i in tqdm(range(0, len(r_x)), desc="UserUserALGO"):
+        for i in tqdm(range(0, len(r_x)), desc=str("UserUserALGO (user_id:" +target_user_id+ ")")):
             if r_x[i] == 0:
                 # Find the top k most similar users
                 if n_most_similar_mapping is not None and preprocess==False:
@@ -141,7 +141,7 @@ class ItemItemALGO(RecommenderALGO):
         r_x = r_sparse[x].toarray().flatten()
         recommendations = []
         preprocess_calculations = {}
-        for u in tqdm(range(0, r_x.shape[0]), desc="ItemItemALGO"):
+        for u in tqdm(range(0, r_x.shape[0]), desc=str("ItemItemALGO (user_id:" +target_user_id+ ")")):
             if r_x[u]!=0:
                 if n_most_similar_mapping is not None and preprocess==False:
                     N = n_most_similar_mapping[u]
@@ -210,24 +210,13 @@ class ContentBasedALGO(RecommenderALGO):
         self.tfidf_matrix = None
         self.movie_mapping = None
         self.metric = None
-    
-    def create_tfidf_matrix(self, movies_df):
-        self.tfidf_vectorizer = TfidfVectorizer()
-        self.tfidf_matrix = self.tfidf_vectorizer.fit_transform(movies_df['title'])
 
-    def get_recommendation_score(self, target_movie_index, N):
-        target_vector = self.tfidf_matrix[target_movie_index]
-        similarity_scores = [self.metric(target_vector, self.tfidf_matrix[target_movie]) for target_movie in N]
-        rec_score = np.sum(similarity_scores)
-
-        return rec_score
-    
     def most_similar_movies(self, target_movie_index, k):
         similarities = [self.metric(self.tfidf_matrix[target_movie_index], self.tfidf_matrix[target_movie]) for target_movie in range(len(self.tfidf_matrix))]
         similar_movies = [i for i in np.argsort(similarities)[::-1][:k]]
 
         return set(similar_movies)
-    
+
     def fit(self, initial_movies_df, target_movie_id, similarity_metric, top_n):
 
         x = target_movie_id        
@@ -246,7 +235,7 @@ class ContentBasedALGO(RecommenderALGO):
         movies_df['title'] = movies_df['title'].str.lower().str.replace('[^\w\s]', '')
         titles = movies_df['title'].tolist()
         
-        self.tfidf_vectorizer = TfidfVectorizer()
+        self.tfidf_vectorizer = CustomTfidfVectorizer()
         self.tfidf_matrix = self.tfidf_vectorizer.fit_transform(titles)
         
         self.movie_mapping = movies_df['movieId'].to_list()
@@ -257,11 +246,15 @@ class ContentBasedALGO(RecommenderALGO):
         
         recommendations = []
         num_movies = len(titles)
-        for i in tqdm(range(num_movies), desc="ContentBasedALGO"):
-            recommendations.append((i,self.metric(self.tfidf_matrix[i].toarray().flatten(),
-                                                  self.tfidf_matrix[x].toarray().flatten())))
+        for i in tqdm(range(num_movies), desc=str("ContentBasedALGO (movie_id:" +str(target_movie_id)+ ")")):
+            recommendations.append((i,self.metric(self.tfidf_matrix[i],
+                                                  self.tfidf_matrix[x])))
         recommendations.sort(key=lambda x: x[1], reverse=True)
-        recommendations = [(self.movie_mapping[t[0]], t[1]) for t in recommendations if t[0] != x]        
+        recommendations = [(self.movie_mapping[t[0]], t[1]) for t in recommendations if t[0] != x]
+        
+        if top_n == -1:
+            return [r[0] for r in recommendations]
+
         recommendations = recommendations[:top_n]
 
         return [r[0] for r in recommendations]
@@ -271,7 +264,7 @@ class HybridALGO(RecommenderALGO):
     def __init__(self):
         super().__init__()
 
-    def fit(self, user_movie_ids, item_movie_ids, weights, top_n):
+    def fit(self, user_movie_ids, item_movie_ids, weights, titles, similarity_metric, top_n):
         
         all_movie_ids = []
         all_user_movie_ids = {}
@@ -286,13 +279,35 @@ class HybridALGO(RecommenderALGO):
 
         recommendations = []
         for movie in all_movie_ids:
-            recommendations.append((movie, 
+            recommendations.append((movie,
                                     weights[0]*all_user_movie_ids[movie] if movie in all_user_movie_ids else 0 +
                                     weights[1]*all_item_movie_ids[movie] if movie in all_item_movie_ids else 0))
+            
+        
         recommendations.sort(key=lambda x: x[1], reverse=True)
-        recommendations = recommendations[:top_n]
+        
+        if top_n%2 == 0:
+            num_movies_from_linear_combination = int(top_n/2)
+        else:
+            num_movies_from_linear_combination = int(top_n/2)+1
 
-        return [r[0] for r in recommendations]
+        recommendations = recommendations[:num_movies_from_linear_combination]
+        reccomendations_ids = [r[0] for r in recommendations]
+        reccomendations_ids_set = set(reccomendations_ids)
+        new_reccomendations_ids = [x for x in reccomendations_ids]
+        if top_n != 1:
+            for movie_id in reccomendations_ids:
+                content_based_algo = ContentBasedALGO()
+                new_movie_ids = content_based_algo.fit(titles, movie_id, similarity_metric, -1)
+                for new_movie_id in new_movie_ids:
+                    if new_movie_id not in reccomendations_ids_set:
+                        new_reccomendations_ids.append(new_movie_id)
+                        reccomendations_ids_set.add(new_movie_id)
+                        break
+                if len(new_reccomendations_ids) == top_n:
+                    break
+
+        return new_reccomendations_ids
             
             
 

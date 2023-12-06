@@ -7,6 +7,6 @@ setup(
     author_email="cs22000222@di.uoa.gr",
     packages=find_packages(),
     install_requires=[
-        "numpy", "pandas", "scikit-learn", "tqdm", "scipy"
+        "numpy", "pandas", "tqdm", "scipy"
     ],
 )

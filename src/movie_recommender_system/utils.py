@@ -1,5 +1,6 @@
 import os
 import pickle
+import numpy as np
 import math
 from collections import Counter
 
@@ -34,37 +35,43 @@ def search_and_read_pickle(directory, file_name):
         print(f'File {file_name} not found in {directory}')
         return None
 
-class TFIDF:
-    def __init__(self, documents):
-        self.documents = documents
-        self.tf = []
-        self.idf = {}
-        self.tfidf_matrix = []
+class CustomTfidfVectorizer:
+    def __init__(self):
+        self.documents_count = 0
+        self.word_document_count = {}
+        self.tfidf_matrix = None
 
-        self._calculate_tf()
-        self._calculate_idf()
-        self._calculate_tfidf_matrix()
+    def fit_transform(self, documents):
+        self.documents_count = len(documents)
 
-    def _calculate_tf(self):
-        for doc in self.documents:
-            term_frequency = Counter(doc)
-            total_terms = len(doc)
-            tf_doc = {term: count / total_terms for term, count in term_frequency.items()}
-            self.tf.append(tf_doc)
+        # Count document frequency for each term
+        for document in documents:
+            terms = set(document.split())
+            for term in terms:
+                self.word_document_count[term] = self.word_document_count.get(term, 0) + 1
 
-    def _calculate_idf(self):
-        total_documents = len(self.documents)
-        for doc in self.documents:
-            for term in set(doc):
-                self.idf[term] = self.idf.get(term, 0) + 1
+        # Create a vocabulary based on the unique terms in all documents
+        vocabulary = list(self.word_document_count.keys())
+        vocabulary.sort()
 
-        for term, doc_count in self.idf.items():
-            self.idf[term] = math.log(total_documents / (1 + doc_count))
+        # Create a matrix to store the TF-IDF values
+        self.tfidf_matrix = np.zeros((self.documents_count, len(vocabulary)))
 
-    def _calculate_tfidf_matrix(self):
-        for tf_doc in self.tf:
-            tfidf_doc = {term: tf * self.idf[term] for term, tf in tf_doc.items()}
-            self.tfidf_matrix.append(tfidf_doc)
+        # Calculate TF-IDF matrix
+        for i, document in enumerate(documents):
+            tfidf_vector = self.calculate_tfidf_vector(document, vocabulary)
+            self.tfidf_matrix[i, :] = tfidf_vector
 
-    def get_tfidf_matrix(self):
         return self.tfidf_matrix
+
+    def calculate_tfidf_vector(self, document, vocabulary):
+        terms = document.split()
+        tf_vector = dict(Counter(terms))
+        tfidf_vector = np.zeros(len(vocabulary))
+
+        for j, term in enumerate(vocabulary):
+            tf = tf_vector.get(term, 0)
+            idf = np.log(self.documents_count / (1 + self.word_document_count.get(term, 0)))
+            tfidf_vector[j] = tf * idf
+
+        return tfidf_vector
