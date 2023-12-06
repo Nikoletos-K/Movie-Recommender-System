@@ -5,4 +5,4 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "movie_recommender_system"
 version = "0.1.0"
-dependencies = [ "numpy", "pandas", "scikit-learn" ]
+dependencies = [ "numpy", "pandas", "scikit-learn", "tqdm", "scipy"]
