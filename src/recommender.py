@@ -121,7 +121,7 @@ elif algorithm == "title":
     movie_ids = content_based_algo.fit(dfs['movies'], input_i, similarity_metric, num_recommendations)
     
 elif algorithm == "hybrid":
-
+    mapping = None
     num_of_reccomendations_returned = -1
     if preprocess:
         directory_path = './preprocessed_data_100k' if 'ml-100k' in data_dir else './preprocessed_data_latest'
