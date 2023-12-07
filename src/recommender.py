@@ -78,8 +78,10 @@ elif 'ml-100k' in data_dir:
 # Calculate execution time
 start_time = time.time()
 
+user_dictionary_found = False
+item_dictionary_found = False
 if algorithm == "user":
-
+    mapping = None
     if preprocess:
         directory_path = './preprocessed_data_100k' if 'ml-100k' in data_dir else './preprocessed_data_latest'
         file_to_search = dataset+'_user_' + str(input_i) +'_'+ similarity_metric  + '.pkl'
@@ -88,13 +90,15 @@ if algorithm == "user":
 
         if loaded_dictionary:
             print('Loaded Dictionary!')
-        mapping = loaded_dictionary[int(input_i)]
-    else:
-        mapping = None
+            user_dictionary_found = True
+            mapping = loaded_dictionary[int(input_i)]
+        else:
+            mapping = None
 
     algo = UserUserALGO()
     movie_ids = algo.fit(dfs['ratings'], input_i, similarity_metric, num_recommendations, preprocess=False, n_most_similar_mapping=mapping)
 elif algorithm == "item":
+    mapping = None
     if preprocess:
         directory_path = './preprocessed_data_100k' if 'ml-100k' in data_dir else './preprocessed_data_latest'
         file_to_search = dataset+'_item_' + str(input_i) +'_'+ similarity_metric  + '.pkl'
@@ -103,9 +107,9 @@ elif algorithm == "item":
 
         if loaded_dictionary:
             print('Loaded Dictionary!')
-        mapping = loaded_dictionary[int(input_i)]
-    else:
-        mapping = None
+            mapping = loaded_dictionary[int(input_i)]
+        else:
+            mapping = None
 
     algo = ItemItemALGO()
     movie_ids = algo.fit(dfs['ratings'], input_i, similarity_metric, num_recommendations, preprocess=False, n_most_similar_mapping=mapping)
@@ -127,9 +131,9 @@ elif algorithm == "hybrid":
 
         if loaded_dictionary:
             print('Loaded Dictionary!')
-        mapping = loaded_dictionary[int(input_i)]
-    else:
-        mapping = None
+            mapping = loaded_dictionary[int(input_i)]
+        else:
+            mapping = None
 
     algo = UserUserALGO()
     user_movie_ids = algo.fit(dfs['ratings'], input_i, similarity_metric, num_of_reccomendations_returned, preprocess=False, n_most_similar_mapping=mapping)
@@ -142,9 +146,9 @@ elif algorithm == "hybrid":
 
         if loaded_dictionary:
             print('Loaded Dictionary!')
-        mapping = loaded_dictionary[int(input_i)]
-    else:
-        mapping = None
+            mapping = loaded_dictionary[int(input_i)]
+        else:
+            mapping = None
 
     algo = ItemItemALGO()
     item_movie_ids = algo.fit(dfs['ratings'], input_i, similarity_metric, num_of_reccomendations_returned, preprocess=False, n_most_similar_mapping=mapping)

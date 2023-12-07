@@ -1,9 +1,0 @@
-Metadata-Version: 2.1
-Name: movie-recommender-system
-Version: 0.1.0
-Author: Konstantinos Nikoletos
-Author-email: cs22000222@di.uoa.gr
-Requires-Dist: numpy
-Requires-Dist: pandas
-Requires-Dist: tqdm
-Requires-Dist: scipy

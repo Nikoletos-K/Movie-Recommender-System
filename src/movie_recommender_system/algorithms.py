@@ -60,7 +60,7 @@ class UserUserALGO(RecommenderALGO):
         recommendations = []
         
         preprocess_calculations = {}
-        for i in tqdm(range(0, len(r_x)), desc=str("UserUserALGO (user_id:" +target_user_id+ ")")):
+        for i in tqdm(range(0, len(r_x)), desc=str("UserUserALGO (user_id:" +str(target_user_id)+ ")")):
             if r_x[i] == 0:
                 # Find the top k most similar users
                 if n_most_similar_mapping is not None and preprocess==False:

@@ -19,10 +19,12 @@ from movie_recommender_system.utils import movie_ids_to_movie_titles
 parser = argparse.ArgumentParser(description='Movie Recommender System')
 parser.add_argument('-d', type=str, required=True)
 parser.add_argument('-u', type=str, required=False)
+parser.add_argument('-nrows', type=str, required=False)
 
 args = parser.parse_args()
 data_dir = args.d
 num_of_users = int(args.u) if args.u else -1
+nrows = int(args.nrows) if args.nrows else None
 
 
 print("\n\nMovie Recommender System - PREPROCESSING")
@@ -40,13 +42,16 @@ if 'ml-latest' in data_dir:
     print("CSV files found: ", csv_files)
     dfs = {}
     for file in csv_files:
-        if file == 'genome-scores.csv' or file == 'genome-tags.csv' or file == 'links.csv':
-            continue
         print("\nReading: ", file)
-        df = pd.read_csv(os.path.join(data_folder, file), nrows=1000)
+        if nrows:
+            df = pd.read_csv(os.path.join(data_folder, file), nrows=nrows)
+        else:
+            df = pd.read_csv(os.path.join(data_folder, file))
         file_name = file.split('.')[0]
         print("Saving as: ", file_name)
         print("Size: ", df.shape)
+        print("Number of rows: ", df.shape[0])
+        print("Number of columns: ", df.shape[1])
         print("Columns: ", df.columns)
         dfs[file_name] = df
 elif 'ml-100k' in data_dir:
@@ -55,17 +60,20 @@ elif 'ml-100k' in data_dir:
     print("\nReading: u.data")
     dfs['ratings'] = pd.read_csv(os.path.join(data_folder, 'u.data'), sep='\t', header=None, names=['userId','movieId','rating','timestamp'])
     print(dfs['ratings'].head())
+    print("Number of rows: ", dfs['ratings'].shape[0], "\nNumber of columns: ", dfs['ratings'].shape[1], "\nColumns: ", dfs['ratings'].columns)    
 
     print("Reading: u.item")
     dfs['movies'] = pd.read_csv(os.path.join(data_folder, 'u.item'), sep='|', header=None, names=['movieId','title'], usecols=[0,1], encoding='latin-1')
     print(dfs['movies'].head())
+    print("Number of rows: ", dfs['movies'].shape[0], "\nNumber of columns: ", dfs['movies'].shape[1], "\nColumns: ", dfs['movies'].columns)
+
 
 similarity_metrics = ['cosine', 'dice', 'jaccard', 'pearson']
 
 for similarity_metric in tqdm(similarity_metrics):
     user_preprocess_data = {}
     users = sorted(dfs['ratings']['userId'].unique())
-    for user in tqdm(users, desc="UserUserALGO"):
+    for user in tqdm(users, desc="UserUserALGO-Preprocess"):
         # print("\nUser: ", user)
         algo = UserUserALGO()
         N_most_similar = algo.fit(dfs['ratings'], user, similarity_metric, 0, preprocess=True)
@@ -100,7 +108,7 @@ item_preprocess_data = {}
 for similarity_metric in tqdm(similarity_metrics):
     item_preprocess_data = {}
     users = sorted(dfs['ratings']['userId'].unique())
-    for user in tqdm(users, desc="ItemItemALGO"):
+    for user in tqdm(users, desc="ItemItemALGO-Preprocess"):
         algo = ItemItemALGO()
         N_most_similar = algo.fit(dfs['ratings'], user, similarity_metric, 0, preprocess=True)
         user_preprocess_data[user] = N_most_similar
@@ -124,5 +132,5 @@ for similarity_metric in tqdm(similarity_metrics):
 
         print(f'Dictionary saved to {str(full_path)}')
 
-        if user == 10:
+        if user == num_of_users:
             break
