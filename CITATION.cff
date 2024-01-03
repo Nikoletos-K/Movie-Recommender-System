@@ -10,7 +10,6 @@ authors:
 - family-names: "Koubarakis"
   given-names: "Manolis"
 title: "pyJedAI: a lightsaber for Link Discovery"
-version: 0.1.1
 url: "https://pyjedai.readthedocs.io/en/latest/intro.html"
 preferred-citation:
   type: conference-paper
@@ -25,4 +24,5 @@ preferred-citation:
       given-names: "Manolis"
   journal: "International Semantic Web Conference 2022 Posters, Demos and Industry Tracks"
   title: "pyJedAI: a lightsaber for Link Discovery"
+  booktitle: "ISWC"
   year: 2022
