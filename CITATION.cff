@@ -11,22 +11,9 @@ authors:
   given-names: "Manolis"
 title: "pyJedAI: a lightsaber for Link Discovery"
 url: "https://pyjedai.readthedocs.io/en/latest/intro.html"
+venue: ISWC
 cite-as:
   - name: Demo at ISWC
+    type: conference-paper
     entry: |
       Nikoletos, K., Papadakis, G., & Koubarakis, M. (2022). pyJedAI: a lightsaber for Link Discovery. Demo at ISWC. [Conference paper].
-preferred-citation:
-  type: conference-paper
-  authors:
-    - family-names: "Nikoletos"
-      given-names: "Konstantinos"
-      orcid: "https://orcid.org/0000-0003-3465-1197"
-    - family-names: "Papadakis"
-      given-names: "George"
-      orcid: "https://orcid.org/0000-0002-7298-9431"
-    - family-names: "Koubarakis"
-      given-names: "Manolis"
-  journal: "International Semantic Web Conference 2022 Posters, Demos and Industry Tracks"
-  title: "pyJedAI: a lightsaber for Link Discovery"
-  conference: "ISWC"
-  year: 2022
